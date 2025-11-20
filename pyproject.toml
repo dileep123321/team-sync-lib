@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "acme-sync"
-version = "0.0.4"    # last published version, next will be bumped automatically
+version = "0.0.5"    # last published version, next will be bumped automatically
 description = "ACME Sync Python Library"
 readme = "README.md"
 requires-python = ">=3.8"
