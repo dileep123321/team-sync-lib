@@ -6,7 +6,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -16,17 +16,32 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install version bump tools
+      run: |
+        pip install toml build twine keyrings.google-artifactregistry-auth
+
+    - name: Auto bump patch version
+      id: bump
+      run: |
+        version=$(python3 bump_version.py)
+        echo "version=$version" >> $GITHUB_OUTPUT
+        git config user.email "github-actions@github.com"
+        git config user.name "GitHub Actions"
+        git add pyproject.toml
+        git commit -m "Automatic patch bump to $version"
+        git push
+
     - name: Authenticate to Google Cloud (OIDC)
       uses: google-github-actions/auth@v2
       with:
         token_format: access_token
         workload_identity_provider: "projects/382207431122/locations/global/workloadIdentityPools/github-wif-999111/providers/github-provider"
         service_account: "github-oidc-sa@kxnwork.iam.gserviceaccount.com"
-
-    - name: Install Python tools
-      run: |
-        python3 -m pip install --upgrade pip
-        pip install build twine keyrings.google-artifactregistry-auth
 
     - name: Build Python package
       run: python3 -m build
@@ -36,3 +51,4 @@ jobs:
         twine upload \
           --repository-url "https://us-central1-python.pkg.dev/kxnwork/python-libs/" \
           dist/*
+
