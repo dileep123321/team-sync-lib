@@ -1,0 +1,38 @@
+name: Publish Python Package to GAR
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud (OIDC)
+      uses: google-github-actions/auth@v2
+      with:
+        token_format: access_token
+        workload_identity_provider: "projects/382207431122/locations/global/workloadIdentityPools/github-wif-999111/providers/github-provider"
+        service_account: "github-oidc-sa@kxnwork.iam.gserviceaccount.com"
+
+    - name: Install Python tools
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install build twine keyrings.google-artifactregistry-auth
+
+    - name: Build Python package
+      run: python3 -m build
+
+    - name: Upload to Google Artifact Registry
+      run: |
+        twine upload \
+          --repository-url "https://us-central1-python.pkg.dev/kxnwork/python-libs/" \
+          dist/*
