@@ -1,16 +1,15 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "acme_sync"
-version = "0.0.3"
-description = "Simple Python library published via GAR + GitHub OIDC"
+name = "acme-sync"
+version = "0.0.3"    # last published version, next will be bumped automatically
+description = "ACME Sync Python Library"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 
-[tool.hatch.build]
-sources = ["src"]
+dependencies = []
 
-[tool.hatch.build.targets.wheel]
-packages = ["acme_sync"]
+[tool.setuptools.packages.find]
+where = ["src"]
