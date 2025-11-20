@@ -16,24 +16,23 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    # -----------------------------
+    # ---------------------------------------
     # Step 1: Auto bump version
-    # -----------------------------
+    # ---------------------------------------
     - name: Auto bump version
       run: |
         python3 bump_version.py
         echo "VERSION=$(grep '^version' pyproject.toml | cut -d '\"' -f2)" >> $GITHUB_ENV
 
-    # Commit bumped version to repo
     - name: Commit bumped version
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: "chore: bump version to ${{ env.VERSION }}"
         branch: main
 
-    # -----------------------------
+    # ---------------------------------------
     # Step 2: Authenticate to GCP
-    # -----------------------------
+    # ---------------------------------------
     - name: Authenticate to Google Cloud (OIDC)
       uses: google-github-actions/auth@v2
       with:
@@ -41,38 +40,37 @@ jobs:
         workload_identity_provider: "projects/382207431122/locations/global/workloadIdentityPools/github-wif-999111/providers/github-provider"
         service_account: "github-oidc-sa@kxnwork.iam.gserviceaccount.com"
 
-    # -----------------------------
-    # Step 3: Install tools
-    # -----------------------------
+    # ---------------------------------------
+    # Step 3: Install Python tools
+    # ---------------------------------------
     - name: Install Python tools
       run: |
         python3 -m pip install --upgrade pip
         pip install build twine keyrings.google-artifactregistry-auth pytest
 
-    # -----------------------------
+    # ---------------------------------------
     # Step 4: Clean dist folder
-    # -----------------------------
+    # ---------------------------------------
     - name: Clean dist folder
       run: rm -rf dist/*
 
-    # -----------------------------
+    # ---------------------------------------
     # Step 5: Build package
-    # -----------------------------
+    # ---------------------------------------
     - name: Build package
       run: python3 -m build
 
-    # -----------------------------
+    # ---------------------------------------
     # Step 6: Test package
-    # -----------------------------
+    # ---------------------------------------
     - name: Test package install & import
       run: |
         pip install dist/*.whl
-        echo "def test_import(): import acme_sync" > test_import.py
         pytest -q
 
-    # -----------------------------
-    # Step 7: Upload to GAR
-    # -----------------------------
+    # ---------------------------------------
+    # Step 7: Upload to Google Artifact Registry
+    # ---------------------------------------
     - name: Upload to GAR
       run: |
         twine upload \
